@@ -19,12 +19,11 @@
 ## Matchers:
 
 ### expect:
+
 Expects output, does not check status code.
 
     expect "foo\nbar" from \
       ls unf
-
-## Matchers to come: 
 
 ### expect\_code
 
@@ -32,9 +31,13 @@ Expects output, does not check status code.
        command_under_test
 
 ### expect\_match
+
+Regexp. Throught grep -E
+
     expect_match "regexp" from \
        command_under_test
 
 
 ## Runner:
+
     run\_all\_tests
