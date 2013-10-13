@@ -13,8 +13,7 @@
 ## Conventions:
  * t\_whatever\_you\_like - functions which names begin in t\_ are runned
    automatically by runner
- * before and after - define those functions, they'll be evaluated between
-   every test call (before and after).
+ * before and after - define those functions, they'll be evaluated every test call (before and after).
 
 
 ## Matchers:
@@ -47,4 +46,4 @@ All matchers can be negated with not just after name, before expectation
 
 ## Runner:
 
-    run\_all\_tests
+    run_all_tests
