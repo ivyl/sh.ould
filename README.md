@@ -5,6 +5,7 @@
 **BASH** Testing Framework
 
 ## Features:
+ * WIP
  * Runner
  * Nice matchers
  * Nice output (colors, backtraces)
@@ -37,6 +38,12 @@ Regexp. Throught grep -E
     expect_match "regexp" from \
        command_under_test
 
+### negating
+
+All matchers can be negated with not just after name, before expectation
+
+    expect not "foo" from \
+       echo bar
 
 ## Runner:
 

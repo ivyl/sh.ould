@@ -7,9 +7,19 @@ function t_expect() {
         echo foo
 }
 
-function t_expect_fail() {
+function t_expect_error() {
     expect "bar" from \
         echo foo
+}
+
+function t_not_expect() {
+    expect not "foo" from \
+        echo bar
+}
+
+function t_not_expect_error() {
+    expect not "bar" from \
+        echo bar
 }
 
 function t_match() {
@@ -22,6 +32,16 @@ function t_match_error() {
         echo foo
 }
 
+function t_not_match() {
+    expect_match not "^foo" from \
+        echo bar
+}
+
+function t_not_match_error() {
+    expect_match not "^foo" from \
+        echo foo
+}
+
 function t_code() {
     expect_code 0 from \
         echo foo
@@ -29,6 +49,16 @@ function t_code() {
 
 function t_code_error() {
     expect_code 1 from \
+        echo foo
+}
+
+function t_not_code() {
+    expect_code not 1 from \
+        echo foo
+}
+
+function t_not_code_error() {
+    expect_code not 0 from \
         echo foo
 }
 

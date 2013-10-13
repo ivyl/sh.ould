@@ -12,10 +12,18 @@ function append_error() {
     ERRORS="$ERRORS\n\n$@"
 }
 
+function build_output() {
+    while [ "$#" -gt 0 ]; do
+        echo "$1\n"
+        echo "\n"
+        shift
+    done
+}
+
 function backtrace() {
     echo "Backtrace:"
     echo "\n"
-    i=$1
+    local i=$1
 
     while caller $i
     do
@@ -25,65 +33,102 @@ function backtrace() {
 }
 
 function expect() {
-    EXPECTATION="$1"
+    local OPERATOR='='
+    if [ "$1" = "not" ]; then
+        local ERR="NOT"
+        OPERATOR='!='
+        shift
+    fi
+
+    local EXPECTATION="$1"
     shift
 
+
     if [ "$1" != "from" ]; then
-        echo -e "expect usage:\nexpect \"foo bar\" from \\ \n  ls unf"
+        echo -e "expect usage:\nexpect [not] \"foo bar\" from \\ \n  ls unf"
     fi
 
     shift
 
-    RESULT=$($@)
+    local RESULT=$($@)
 
-    if [ "$RESULT" = "$EXPECTATION" ]; then
+    if [ "$RESULT" $OPERATOR "$EXPECTATION" ]; then
         echo -en "${GREEN}."
     else
         echo -en "${RED}."
-        append_error "\n${RED}Expectation error.\nCommand: $@\nExpected: $EXPECTATION\nGOT: $RESULT\n\n$(backtrace 1)"
+        append_error "$( build_output \
+            "${RED}Expectation error." \
+            "Command: $@" \
+            "$ERR Expected: $EXPECTATION" \
+            "GOT: $RESULT" \
+            "$(backtrace 1)")"
     fi
 }
 
 function expect_match() {
-    REGEXP="$1"
+    OPERATOR='-eq'
+    if [ "$1" = "not" ]; then
+        local ERR="NOT"
+        OPERATOR="-ne"
+        shift
+    fi
+
+    local REGEXP="$1"
     shift
 
     if [ "$1" != "from" ]; then
-        echo -e "expect usage:\nexpect_match \"^bar\" from \\ \n  ls unf"
+        echo -e "expect usage:\nexpect_match [not] \"^bar\" from \\ \n  ls unf"
     fi
 
     shift
 
-    RESULT=$($@)
+    local RESULT=$($@)
     grep -E "$REGEXP" <(echo $RESULT) > /dev/null
-    CODE=$?
+    local CODE=$?
 
-    if [ "$CODE" -eq 0 ]; then
+    if [ "$CODE" $OPERATOR 0 ]; then
         echo -en "${GREEN}."
     else
         echo -en "${RED}."
-        append_error "\n${RED}Match error.\nCommand: $@\nExpected match: $(printf "%q" $REGEXP)\nON: $RESULT\n$(backtrace 1)"
+        append_error "$( build_output \
+            "${RED}Match error." \
+            "Command: $@" \
+            "$ERR Expected match: $(printf "%q" $REGEXP)" \
+            "ON: $RESULT" \
+            "$(backtrace 1)")"
     fi
 }
 
 function expect_code() {
-    EXPECTED_CODE="$1"
+    local OPERATOR='-eq'
+    if [ "$1" = "not" ]; then
+        local ERR="NOT"
+        OPERATOR='-ne'
+        shift
+    fi
+
+    local EXPECTED_CODE="$1"
     shift
 
     if [ "$1" != "from" ]; then
-        echo -e "expect usage:\nexpect_code 0 from \\ \n  ls unf"
+        echo -e "expect usage:\nexpect_code [not] 0 from \\ \n  ls unf"
     fi
 
     shift
 
     $@ > /dev/null
-    CODE=$?
+    local CODE=$?
 
-    if [ "$CODE" -eq "$EXPECTED_CODE" ]; then
+    if [ "$CODE" $OPERATOR "$EXPECTED_CODE" ]; then
         echo -en "${GREEN}."
     else
         echo -en "${RED}."
-        append_error "\n${RED}Return code error.\nCommand: $@\nExpected code: $EXPECTED_CODE\nGOT: $CODE\n$(backtrace 1)"
+        append_error "$( build_output \
+            "${RED}Return code error." \
+            "Command: $@" \
+            "$ERR Expected code: $EXPECTED_CODE" \
+            "GOT: $CODE" \
+            "$(backtrace 1)")"
     fi
 }
 
@@ -94,6 +139,7 @@ function run_all_tests() {
         eval $test
         after
     done
+
     echo
     echo -e $ERRORS
     echo -en $CLEAR
