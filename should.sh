@@ -40,7 +40,7 @@ function expect() {
         shift
     fi
 
-    local EXPECTATION="$1"
+    local EXPECTATION=$(echo "$1")
     shift
 
 
